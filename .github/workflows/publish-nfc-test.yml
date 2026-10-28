@@ -1,4 +1,4 @@
-name: Publish NFC test download
+name: Verify NFC test download
 
 on:
   push:
@@ -8,33 +8,20 @@ on:
       - '.github/workflows/publish-nfc-test.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - name: Publish the existing verified test APK
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Download both public assets without authentication
         shell: bash
         run: |
           set -euo pipefail
-          apk="$RUNNER_TEMP/Majid-Khodaparast-NFC.apk"
-          gh api "repos/$GITHUB_REPOSITORY/git/blobs/76336ee9aeee495c3963680bf6b8291f9f79fc54" --jq .content | base64 --decode > "$apk"
-          echo "a40414a3789de693d90947ba923035b310777905c49915d41d7ff99c56e4606b  $apk" | sha256sum --check
-          python3 - "$apk" "$RUNNER_TEMP/Majid-Khodaparast-NFC.zip" <<'PY'
-          import pathlib, sys, zipfile
-          with zipfile.ZipFile(sys.argv[2], 'w', zipfile.ZIP_DEFLATED) as archive:
-              archive.write(sys.argv[1], arcname=pathlib.Path(sys.argv[1]).name)
-          PY
-          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
-          نسخهٔ آزمایشی برنامهٔ NFC کارت ویزیت برای گوشی اندرویدی دارای NFC و HCE.
-          این APK نسخهٔ debug است و خارج از Play Store نصب می‌شود. عملکرد نزدیک‌کردن دو گوشی باید روی دستگاه‌های واقعی بررسی شود.
-          EOF
-          gh release create nfc-android-test-1 "$apk" "$RUNNER_TEMP/Majid-Khodaparast-NFC.zip" \
-            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title 'اپ آزمایشی NFC کارت ویزیت' --notes-file "$RUNNER_TEMP/release-notes.md" \
-            --draft --prerelease
-          gh release edit nfc-android-test-1 --repo "$GITHUB_REPOSITORY" --draft=false
+          base='https://github.com/RwinFu/khodaparast-card/releases/download/nfc-android-test-1'
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 120 --output "$RUNNER_TEMP/Majid-Khodaparast-NFC.apk" "$base/Majid-Khodaparast-NFC.apk"
+          echo "a40414a3789de693d90947ba923035b310777905c49915d41d7ff99c56e4606b  $RUNNER_TEMP/Majid-Khodaparast-NFC.apk" | sha256sum --check
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 120 --output "$RUNNER_TEMP/Majid-Khodaparast-NFC.zip" "$base/Majid-Khodaparast-NFC.zip"
+          echo "331a9c7d7b8bc76a5f40594181867b57f455ce638127c719242895324590be18  $RUNNER_TEMP/Majid-Khodaparast-NFC.zip" | sha256sum --check
+          unzip -t "$RUNNER_TEMP/Majid-Khodaparast-NFC.zip"
