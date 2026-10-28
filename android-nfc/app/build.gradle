@@ -1,0 +1,25 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.persiarobot.cardnfc'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.persiarobot.cardnfc'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0-test'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}

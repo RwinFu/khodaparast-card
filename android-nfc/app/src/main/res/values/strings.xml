@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">کارت NFC مجید خداپرست</string>
+    <string name="service_description">اشتراک لینک کارت ویزیت با NFC</string>
+    <string name="eyebrow">PERSIA ROBOT MACHINE</string>
+    <string name="heading">کارت ویزیت با NFC</string>
+    <string name="person_name">مجید خداپرست</string>
+    <string name="description">واردات و تامین برینگ های صنعتی و تجهیزات انتقال قدرت</string>
+    <string name="section_label">اشتراک‌گذاری حضوری</string>
+    <string name="status_ready">NFC آماده است</string>
+    <string name="status_active">اشتراک‌گذاری فعال است</string>
+    <string name="status_off">NFC گوشی خاموش است</string>
+    <string name="status_unsupported">این گوشی از اشتراک NFC پشتیبانی نمی‌کند</string>
+    <string name="status_error">فعال‌سازی NFC انجام نشد</string>
+    <string name="detail_ready">برای شروع، دکمهٔ زیر را بزنید.</string>
+    <string name="detail_active">برنامه را باز نگه دارید و پشت گوشی را به گوشی طرف مقابل نزدیک کنید. ممکن است او برای بازکردن لینک، اعلان را لمس کند.</string>
+    <string name="detail_off">ابتدا NFC را در تنظیمات گوشی روشن کنید.</string>
+    <string name="detail_unsupported">برای ارسال بدون برچسب، گوشی فرستنده باید NFC و قابلیت HCE داشته باشد. می‌توانید از QR استفاده کنید.</string>
+    <string name="detail_error">بررسی کنید NFC روشن باشد و دوباره تلاش کنید. در صورت تداخل، از QR استفاده کنید.</string>
+    <string name="start_nfc">فعال‌کردن NFC</string>
+    <string name="stop_nfc">پایان اشتراک‌گذاری</string>
+    <string name="open_nfc_settings">بازکردن تنظیمات NFC</string>
+    <string name="open_card">مشاهده کارت ویزیت</string>
+    <string name="show_qr">نمایش کد QR</string>
+    <string name="qr_title">کد QR کارت ویزیت</string>
+    <string name="close">بستن</string>
+    <string name="footer_note">گوشی‌ها باید NFC داشته باشند و نزدیک آنتن یکدیگر قرار بگیرند. سازگاری به مدل و تنظیمات گوشی‌ها بستگی دارد.</string>
+    <string name="no_browser">مرورگری برای بازکردن کارت پیدا نشد.</string>
+</resources>

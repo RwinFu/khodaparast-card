@@ -1,0 +1,86 @@
+name: Build Android NFC card
+
+on:
+  push:
+    branches:
+      - arena/bc544a20-khodaparast-card
+    paths:
+      - 'android-nfc/**'
+      - '.github/workflows/android-nfc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out the source
+        uses: actions/checkout@v7
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Test and build the debug APK
+        working-directory: android-nfc
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon testDebugUnitTest assembleDebug 2>&1 | tee "$RUNNER_TEMP/nfc-build.log"
+      # Export blobs temporarily so the restricted local workspace can retrieve build outputs.
+      - name: Export diagnostic log
+        if: always()
+        id: log_blob
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/nfc-build.log" || echo 'Build did not reach Gradle.' > "$RUNNER_TEMP/nfc-build.log"
+          python3 - "$RUNNER_TEMP/nfc-build.log" "$RUNNER_TEMP/log-blob.json" <<'PY'
+          import base64, json, pathlib, sys
+          data = pathlib.Path(sys.argv[1]).read_bytes()
+          pathlib.Path(sys.argv[2]).write_text(json.dumps({'content': base64.b64encode(data).decode(), 'encoding': 'base64'}))
+          PY
+          sha=$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/blobs" --input "$RUNNER_TEMP/log-blob.json" --jq .sha)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - name: Export the APK
+        if: success()
+        id: apk_blob
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - 'android-nfc/app/build/outputs/apk/debug/app-debug.apk' "$RUNNER_TEMP/apk-blob.json" <<'PY'
+          import base64, json, pathlib, sys
+          data = pathlib.Path(sys.argv[1]).read_bytes()
+          pathlib.Path(sys.argv[2]).write_text(json.dumps({'content': base64.b64encode(data).decode(), 'encoding': 'base64'}))
+          PY
+          sha=$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/blobs" --input "$RUNNER_TEMP/apk-blob.json" --jq .sha)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - name: Upload the build log
+        if: always() && steps.log_blob.outputs.sha != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: nfc-build-log-${{ steps.log_blob.outputs.sha }}
+          path: ${{ runner.temp }}/nfc-build.log
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload the debug APK
+        if: success() && steps.apk_blob.outputs.sha != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: nfc-card-apk-${{ steps.apk_blob.outputs.sha }}
+          path: android-nfc/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
