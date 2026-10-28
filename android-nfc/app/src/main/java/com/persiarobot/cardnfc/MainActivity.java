@@ -50,8 +50,7 @@ public final class MainActivity extends Activity {
         detail = findViewById(R.id.detail);
         toggle = findViewById(R.id.toggle_nfc);
         settings = findViewById(R.id.nfc_settings);
-        getSharedPreferences(CardConfig.PREFERENCES, MODE_PRIVATE).edit()
-                .putBoolean(CardConfig.ACTIVE, false).apply();
+        SessionState.active = false;
 
         adapter = NfcAdapter.getDefaultAdapter(this);
         supportsHce = adapter != null && getPackageManager()
@@ -119,8 +118,7 @@ public final class MainActivity extends Activity {
                     // Older/vendor implementations can still use ordinary HCE routing.
                 }
             }
-            getSharedPreferences(CardConfig.PREFERENCES, MODE_PRIVATE).edit()
-                    .putBoolean(CardConfig.ACTIVE, true).apply();
+            SessionState.active = true;
             active = true;
         } catch (RuntimeException error) {
             stopSharing();
@@ -129,8 +127,7 @@ public final class MainActivity extends Activity {
     }
 
     private void stopSharing() {
-        getSharedPreferences(CardConfig.PREFERENCES, MODE_PRIVATE).edit()
-                .putBoolean(CardConfig.ACTIVE, false).apply();
+        SessionState.active = false;
         if (preferred && cardEmulation != null) {
             try {
                 cardEmulation.unsetPreferredService(this);
